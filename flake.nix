@@ -39,14 +39,14 @@
       eiji = mkHost "eiji" [];
       ash = mkHost "ash" [];
       charlotte = mkHost "charlotte" [ bc-250.nixosModules.bc250 ];
-    #   gyaruko = mkHost "gyaruko" [];
+      gyaruko = mkHost "gyaruko" [ bc-250.nixosModules.bc250 ];
     };
 
     apps.${system} = {
       deploy-eiji = mkDeployApp "eiji" "eiji.home.endercass.me";
       deploy-ash = mkDeployApp "ash" "ash.home.endercass.me";
       deploy-charlotte = mkDeployApp "charlotte" "charlotte.home.endercass.me";
-    #   deploy-gyaruko = mkDeployApp "gyaruko" "gyaruko.home.endercass.me";
+      deploy-gyaruko = mkDeployApp "gyaruko" "gyaruko.home.endercass.me";
     };
 
     devShells.${system}.default = pkgs.mkShell {
