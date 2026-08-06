@@ -1,0 +1,7 @@
+keys:
+  - &admin_endercass age1z0k5snlgwxjn7ptkt2yfsrcads8fcjhpjvteragz405k6z07gfwqhjwu0n
+  - &host_ash age13swx0n7qyv6rxhm4chgj680k36qjalnd5ls9vafapkky3w47w3es3um375
+creation_rules:
+  - path_regex: secrets/ash/.*
+    key_groups:
+      - age: [*admin_endercass, *host_ash]
