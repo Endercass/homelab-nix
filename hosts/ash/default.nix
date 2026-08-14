@@ -30,10 +30,13 @@
     sopsFile = ../../secrets/ash/authentik.env;
     format = "dotenv";
     key = "";
-    # ponytail: world-readable so authentik's DynamicUser services can read it
-    # once bind-mounted into the container. Group-based perms don't reliably
-    # cross the host/container namespace boundary without pinning a shared
-    # GID on both sides; do that instead if this needs tightening.
+    mode = "0444";
+  };
+
+  sops.secrets."authentik-ldap-env" = {
+    sopsFile = ../../secrets/ash/authentik-ldap.env;
+    format = "dotenv";
+    key = "";
     mode = "0444";
   };
 
@@ -43,6 +46,11 @@
 
     bindMounts."/run/secrets/authentik-env" = {
       hostPath = config.sops.secrets."authentik-env".path;
+      isReadOnly = true;
+    };
+
+    bindMounts."/run/secrets/authentik-ldap-env" = {
+      hostPath = config.sops.secrets."authentik-ldap-env".path;
       isReadOnly = true;
     };
 
@@ -59,9 +67,6 @@
         interface = "mv-enp2s0";
       };
       networking.nameservers = ["10.0.0.1"];
-      # The container's own systemd-resolved (default for networking.useNetworkd)
-      # conflicts with the host-resolv.conf copy containers get by default,
-      # since that file points at the host's netns-local stub resolver.
       networking.useHostResolvConf = false;
     };
   };

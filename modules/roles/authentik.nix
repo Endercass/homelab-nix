@@ -1,8 +1,6 @@
 {...}: {
   services.authentik = {
     enable = true;
-    # Bind-mounted into the container from the host's sops-nix secret store
-    # (see containers.authentik.bindMounts in hosts/ash/default.nix).
     environmentFile = "/run/secrets/authentik-env";
     settings = {
       disable_startup_analytics = true;
@@ -10,7 +8,13 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [9000];
+  services.authentik-ldap = {
+    enable = true;
+    environmentFile = "/run/secrets/authentik-ldap-env";
+  };
+  systemd.services.authentik-ldap.serviceConfig.AmbientCapabilities = ["CAP_NET_BIND_SERVICE"];
+
+  networking.firewall.allowedTCPPorts = [9000 389 636];
 
   system.stateVersion = "26.05";
 }
