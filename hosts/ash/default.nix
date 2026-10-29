@@ -86,7 +86,6 @@
         dhcp = true;
         interface = "mv-enp2s0";
       };
-      networking.nameservers = ["10.0.0.1"];
       networking.useHostResolvConf = false;
 
       services.tailscale = {

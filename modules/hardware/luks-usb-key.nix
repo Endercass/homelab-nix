@@ -78,7 +78,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    boot.initrd.systemd.enable = true;
+    # boot.initrd.systemd.enable = true;
     boot.initrd.systemd.initrdBin = with pkgs; [util-linux coreutils];
     boot.initrd.systemd.storePaths = [findUsbKeyScript];
 
