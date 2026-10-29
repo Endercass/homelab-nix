@@ -8,11 +8,18 @@ with lib; let
   cfg = config.homelab.networkd;
 in {
   options.homelab.networkd = {
-    enable = mkEnableOption "static ethernet networking via systemd-networkd";
+    enable = mkEnableOption "ethernet networking via systemd-networkd";
+
+    dhcp = mkOption {
+      type = types.bool;
+      default = false;
+      description = "whether to obtain the network configuration via DHCP";
+    };
 
     address = mkOption {
-      type = types.str;
-      description = "static ipv4 address. required";
+      type = types.nullOr types.str;
+      default = null;
+      description = "static ipv4 address, when DHCP is disabled";
       example = "10.0.5.20";
     };
 
@@ -37,8 +44,6 @@ in {
 
   config = mkIf cfg.enable {
     networking.useNetworkd = true;
-    networking.useDHCP = false;
-
     networking.networkmanager.enable = mkForce false;
 
     systemd.network.enable = true;
@@ -48,9 +53,9 @@ in {
         Name = cfg.interface;
         Type = "ether";
       };
-      address = ["${cfg.address}/${toString cfg.prefixLength}"];
-      gateway = [cfg.gateway];
-      networkConfig.DHCP = "no";
+      address = optional (!cfg.dhcp) "${cfg.address}/${toString cfg.prefixLength}";
+      gateway = optional (!cfg.dhcp) cfg.gateway;
+      networkConfig.DHCP = if cfg.dhcp then "yes" else "no";
       linkConfig.RequiredForOnline = "routable";
     };
   };

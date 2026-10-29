@@ -1,7 +1,23 @@
 keys:
   - &admin_endercass age1z0k5snlgwxjn7ptkt2yfsrcads8fcjhpjvteragz405k6z07gfwqhjwu0n
   - &host_ash age13swx0n7qyv6rxhm4chgj680k36qjalnd5ls9vafapkky3w47w3es3um375
+  - &host_eiji age1rtpz8vvcekdwwvuvpd09emcvze788w9vvyjdk2em5cfewu8tneqqajkz7s
+  - &host_charlotte age1t0zdylpmal77fqurwmq6fxeeelx566gy6jg32v0tles6h8nvzyxsssp7g6
+  - &host_gyaruko age19pjy7n7q5pvm3e360urg3z45zkcl57vf78xjed5ym4c0rd92rd0q9ud4qd
+  - &host_relay age1dufaur4rd0028pgvlrcu7mcyng3t4tsprh9nujgge8svre3agdfs0m2qnr
 creation_rules:
   - path_regex: secrets/ash/.*
     key_groups:
       - age: [*admin_endercass, *host_ash]
+  - path_regex: secrets/eiji/.*
+    key_groups:
+      - age: [*admin_endercass, *host_eiji]
+  - path_regex: secrets/charlotte/.*
+    key_groups:
+      - age: [*admin_endercass, *host_charlotte]
+  - path_regex: secrets/gyaruko/.*
+    key_groups:
+      - age: [*admin_endercass, *host_gyaruko]
+  - path_regex: secrets/relay/.*
+    key_groups:
+      - age: [*admin_endercass, *host_relay]

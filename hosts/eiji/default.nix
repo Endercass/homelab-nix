@@ -21,10 +21,24 @@
 
   homelab.networkd = {
     enable = true;
-    address = "10.0.8.1";
+    dhcp = true;
   };
 
   homelab.luksUsbKey.enable = true;
+
+  sops.secrets."headscale-preauthkey" = {
+    sopsFile = ../../secrets/eiji/headscale-preauthkey;
+    format = "binary";
+    key = "";
+    mode = "0400";
+  };
+
+  services.tailscale = {
+    enable = true;
+    authKeyFile = config.sops.secrets."headscale-preauthkey".path;
+    extraUpFlags = ["--login-server=https://headscale.endercass.me"];
+    openFirewall = true;
+  };
 
   boot.initrd.luks.devices.cryptroot.device = "/dev/disk/by-label/NIXOS-LUKS";
 

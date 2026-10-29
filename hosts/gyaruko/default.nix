@@ -1,7 +1,5 @@
 {
   config,
-  lib,
-  pkgs,
   ...
 }: {
   imports = [
@@ -36,10 +34,24 @@
 
   homelab.networkd = {
     enable = true;
-    address = "10.0.11.1";
+    dhcp = true;
   };
 
   homelab.luksUsbKey.enable = true;
+
+  sops.secrets."headscale-preauthkey" = {
+    sopsFile = ../../secrets/gyaruko/headscale-preauthkey;
+    format = "binary";
+    key = "";
+    mode = "0400";
+  };
+
+  services.tailscale = {
+    enable = true;
+    authKeyFile = config.sops.secrets."headscale-preauthkey".path;
+    extraUpFlags = ["--login-server=https://headscale.endercass.me"];
+    openFirewall = true;
+  };
 
   boot.initrd.luks.devices.cryptroot.device = "/dev/disk/by-label/NIXOS-LUKS";
 
