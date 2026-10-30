@@ -11,6 +11,8 @@
     ../../modules/hardware/lvm-initrd.nix
     ../../modules/hardware/network.nix
     ../../modules/roles/ssh.nix
+    ../../modules/roles/podman.nix
+    ../../modules/roles/wolf.nix
   ];
 
   hardware.bc250 = {
@@ -35,6 +37,20 @@
   users.users.root.openssh.authorizedKeys.keys = with config.homelab.pubkeys; [
     master
   ];
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
+
+  services.udev.extraRules = ''
+    KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+    KERNEL=="uhid", GROUP="input", MODE="0660", OPTIONS+="static_node=uhid"
+  '';
+
+  virtualisation.oci-containers.backend = "podman";
+
+
 
   homelab.networkd = {
     enable = true;
