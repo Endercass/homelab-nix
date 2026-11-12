@@ -155,6 +155,26 @@
         "type": "github"
       }
     },
+    "k0s-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794363577,
+        "narHash": "sha256-5xxyfTOafxBaRo1AEBXgzD7A+lIGbIwOxMlhsGbK85o=",
+        "owner": "nix-community",
+        "repo": "k0s-nix",
+        "rev": "67b53200710e7537108920d75f856c19b6a016b0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "k0s-nix",
+        "type": "github"
+      }
+    },
     "microvm": {
       "inputs": {
         "nixpkgs": [
@@ -299,6 +319,7 @@
         "authentik-nix": "authentik-nix",
         "bc-250": "bc-250",
         "discord-role-bot": "discord-role-bot",
+        "k0s-nix": "k0s-nix",
         "microvm": "microvm",
         "nixos-jellyfin": "nixos-jellyfin",
         "nixpkgs": "nixpkgs_2",

@@ -88,6 +88,14 @@
     mode = "0400";
   };
 
+  homelab.k0s = {
+    enable = true;
+    role = "controller+worker";
+    isLeader = true;
+    apiAddress = "100.81.0.3";
+    nodeIp = "100.81.0.3";
+  };
+
   services.tailscale = {
     enable = true;
     authKeyFile = config.sops.secrets."headscale-preauthkey".path;

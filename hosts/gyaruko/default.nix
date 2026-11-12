@@ -46,11 +46,28 @@
     mode = "0400";
   };
 
+  sops.secrets."k0s-token" = {
+    sopsFile = ../../secrets/gyaruko/k0s-token;
+    format = "binary";
+    key = "";
+    mode = "0400";
+  };
+
   services.tailscale = {
     enable = true;
     authKeyFile = config.sops.secrets."headscale-preauthkey".path;
     extraUpFlags = ["--login-server=https://headscale.endercass.me"];
     openFirewall = true;
+  };
+
+  homelab.k0s = {
+    enable = true;
+    role = "worker";
+    apiAddress = "100.81.0.2";
+    nodeIp = "100.81.0.2";
+    tokenFile = config.sops.secrets."k0s-token".path;
+    nodeLabels = ["hardware.gpu/type=bc250"];
+    nodeTaints = ["dedicated=gpu:NoSchedule"];
   };
 
   boot.initrd.luks.devices.cryptroot.device = "/dev/disk/by-label/NIXOS-LUKS";

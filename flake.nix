@@ -22,6 +22,10 @@
       url = "github:matt1432/nixos-jellyfin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    k0s-nix = {
+      url = "github:nix-community/k0s-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -33,6 +37,7 @@
     sops-nix,
     discord-role-bot,
     nixos-jellyfin,
+    k0s-nix,
     ...
   } @ inputs: let
     # Target system for NixOS hosts (machines are x86_64)
@@ -49,6 +54,7 @@
         modules =
           [
             sops-nix.nixosModules.sops
+            ./modules/roles/k0s.nix
             ./hosts/${hostname}
           ]
           ++ extraModules;
