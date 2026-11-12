@@ -139,6 +139,7 @@
     port = 8080;
     settings = {
       server_url = "https://headscale.endercass.me";
+      prefixes.v4 = "100.81.0.0/16";
       dns = {
         magic_dns = true;
         base_domain = "home.endercass.me";
