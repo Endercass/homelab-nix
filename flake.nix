@@ -18,6 +18,10 @@
       url = "github:Endercass/discord-role-bot";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-jellyfin = {
+      url = "github:matt1432/nixos-jellyfin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -28,6 +32,7 @@
     microvm,
     sops-nix,
     discord-role-bot,
+    nixos-jellyfin,
     ...
   } @ inputs: let
     # Target system for NixOS hosts (machines are x86_64)
@@ -61,6 +66,25 @@
           "$@"
       '');
     };
+
+    mkSopsApp = pkgsForLocal: action: hostname: {
+      type = "app";
+      program = toString (pkgsForLocal.lib.getExe (pkgsForLocal.writeShellApplication {
+          name = "sops-${action}-${hostname}";
+          runtimeInputs = with pkgsForLocal; [ coreutils git sops ];
+          text = ''
+            set -eu
+
+            repo="$(git rev-parse --show-toplevel)"
+            secrets_dir="$repo/secrets/${hostname}"
+
+            find "$secrets_dir" -type f -print0 |
+              while IFS= read -r -d "" secret; do
+                sops --${action} --in-place "$secret"
+              done
+          '';
+        }));
+    };
   in {
     nixosConfigurations = {
       eiji = mkHost "eiji" [ ];
@@ -78,6 +102,16 @@
       deploy-charlotte = mkDeployApp pkgsForLocal "charlotte" "charlotte.home.endercass.me";
       deploy-gyaruko = mkDeployApp pkgsForLocal "gyaruko" "gyaruko.home.endercass.me";
       deploy-relay = mkDeployApp pkgsForLocal "relay" "relay.endercass.me";
+      decrypt-eiji = mkSopsApp pkgsForLocal "decrypt" "eiji";
+      encrypt-eiji = mkSopsApp pkgsForLocal "encrypt" "eiji";
+      decrypt-ash = mkSopsApp pkgsForLocal "decrypt" "ash";
+      encrypt-ash = mkSopsApp pkgsForLocal "encrypt" "ash";
+      decrypt-charlotte = mkSopsApp pkgsForLocal "decrypt" "charlotte";
+      encrypt-charlotte = mkSopsApp pkgsForLocal "encrypt" "charlotte";
+      decrypt-gyaruko = mkSopsApp pkgsForLocal "decrypt" "gyaruko";
+      encrypt-gyaruko = mkSopsApp pkgsForLocal "encrypt" "gyaruko";
+      decrypt-relay = mkSopsApp pkgsForLocal "decrypt" "relay";
+      encrypt-relay = mkSopsApp pkgsForLocal "encrypt" "relay";
     });
 
     devShells = forAllSystems (localSystem: let

@@ -176,6 +176,27 @@
         "type": "github"
       }
     },
+    "nixos-jellyfin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": "systems_2"
+      },
+      "locked": {
+        "lastModified": 1793806350,
+        "narHash": "sha256-vyijL3S/ounZcFWQes1PzGXObq+epkdpRFOACscjImY=",
+        "owner": "matt1432",
+        "repo": "nixos-jellyfin",
+        "rev": "fa6787941fb84e3a00470d8bf2adb49a3309f335",
+        "type": "github"
+      },
+      "original": {
+        "owner": "matt1432",
+        "repo": "nixos-jellyfin",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1793183032,
@@ -279,6 +300,7 @@
         "bc-250": "bc-250",
         "discord-role-bot": "discord-role-bot",
         "microvm": "microvm",
+        "nixos-jellyfin": "nixos-jellyfin",
         "nixpkgs": "nixpkgs_2",
         "sops-nix": "sops-nix"
       }
@@ -320,6 +342,21 @@
       }
     },
     "systems": {
+      "locked": {
+        "lastModified": 1689347949,
+        "narHash": "sha256-12tWmuL2zgBgZkdoB6qXZsgJEH9LR3oUgpaQq2RbI80=",
+        "owner": "nix-systems",
+        "repo": "default-linux",
+        "rev": "31732fcf5e8fea42e59c2488ad31a0e651500f68",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default-linux",
+        "type": "github"
+      }
+    },
+    "systems_2": {
       "locked": {
         "lastModified": 1689347949,
         "narHash": "sha256-12tWmuL2zgBgZkdoB6qXZsgJEH9LR3oUgpaQq2RbI80=",

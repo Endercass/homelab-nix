@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  pkgs,
   ...
 }: {
   imports = [
@@ -10,10 +11,50 @@
     ../../modules/hardware/lvm-initrd.nix
     ../../modules/hardware/network.nix
     ../../modules/roles/ssh.nix
+    ../../modules/roles/docker.nix
+    ../../modules/roles/radarr.nix
+    ../../modules/roles/sonarr.nix
+    ../../modules/roles/prowlarr.nix
+    ../../modules/roles/seerr.nix
+    ../../modules/roles/decypharr.nix
+    inputs.nixos-jellyfin.nixosModules.default
     ../../modules/roles/discord-role-bot.nix
+    (import ../../modules/roles/media-image.nix {
+      imagePath = "/var/lib/media-disk.img";
+      imageSize = "64G";
+      mountPoint = "/media";
+      label = "MEDIA";
+      subdirs = [
+        "movies"
+        "music"
+        "tv"
+        "downloads"
+        "downloads/radarr"
+        "downloads/sonarr"
+        "downloads/lidarr"
+      ];
+    })
   ];
 
   networking.hostName = "ash";
+
+  services.jellyfin = {
+    enable = true;
+    openFirewall = true;
+    cacheDir = "/media/transcode";
+  };
+
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-vaapi-driver   
+      libvpl              
+      libva-utils         
+    ];
+    extraPackages32 = with pkgs.pkgsi686Linux; [
+      intel-vaapi-driver
+    ];
+  };
 
   users.users.root.openssh.authorizedKeys.keys = with config.homelab.pubkeys; [
     master
@@ -53,6 +94,10 @@
     extraUpFlags = ["--login-server=https://headscale.endercass.me"];
     openFirewall = true;
   };
+
+  environment.etc."fuse.conf".text = ''
+    user_allow_other
+  '';
 
   containers.authentik = {
     autoStart = true;
