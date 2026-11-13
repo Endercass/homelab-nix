@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
@@ -10,6 +9,7 @@
     ../../modules/core
     ../../modules/hardware/network.nix
     ../../modules/roles/ssh.nix
+    ../../modules/services/headscale-acl-sync.nix
   ];
 
   networking.hostName = "relay";
@@ -181,6 +181,8 @@
     port = 8080;
     settings = {
       server_url = "https://headscale.endercass.me";
+      policy.mode = "file";
+      policy.path = "/var/lib/headscale-acl-sync/policy.hujson";
       prefixes.v4 = "100.81.0.0/16";
       dns = {
         magic_dns = true;
@@ -197,6 +199,10 @@
         client_secret_path = config.sops.secrets."headscale-oidc-client-secret".path;
         only_start_if_oidc_is_available = false;
         retry_interval = "30s";
+        allowed_groups = [
+          "tailscale_users"
+          "tailscale_admins"
+        ];
       };
     };
   };
@@ -206,6 +212,21 @@
     format = "binary";
     key = "";
     mode = "0400";
+  };
+
+  sops.secrets."authentik-headscale-acl-token" = {
+    sopsFile = ../../secrets/relay/authentik-headscale-acl-token;
+    format = "binary";
+    key = "";
+    mode = "0400";
+    owner = "headscale-acl-sync";
+    group = "headscale";
+  };
+
+  services.headscale-acl-sync = {
+    enable = true;
+    tokenFile = config.sops.secrets."authentik-headscale-acl-token".path;
+    staticPolicyFile = ../../modules/services/headscale-static-policy.json;
   };
 
   services.tailscale = {

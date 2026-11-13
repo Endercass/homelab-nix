@@ -1,0 +1,29 @@
+{
+  "groups": {
+    "group:tailscale_admins": []
+  },
+  "grants": [
+    {
+      "src": [
+        "group:tailscale_admins"
+      ],
+      "dst": [
+        "*"
+      ],
+      "ip": [
+        "*"
+      ]
+    },
+    {
+      "src": [
+        "autogroup:member"
+      ],
+      "dst": [
+        "autogroup:self"
+      ],
+      "ip": [
+        "*"
+      ]
+    }
+  ]
+}

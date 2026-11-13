@@ -2,7 +2,6 @@ args:
 {
   lib,
   pkgs,
-  config,
   ...
 }:
 let
@@ -26,7 +25,6 @@ let
     )
     ++ [ "loop" ];
 
-  mountUnit = lib.escapeSystemdPath mountPoint + ".mount";
   subdirPaths = map (d: mountPoint + "/" + d) subdirs;
 
   postMountScript = pkgs.writeShellScript "media-post-mount-setup" ''
