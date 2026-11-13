@@ -1,8 +1,9 @@
 {
   config,
   ...
-}: {
-  networking.firewall.allowedTCPPorts = [9696];
+}:
+{
+  networking.firewall.allowedTCPPorts = [ 9696 ];
 
   virtualisation.oci-containers.containers.prowlarr = {
     image = "ghcr.io/hotio/prowlarr:latest";

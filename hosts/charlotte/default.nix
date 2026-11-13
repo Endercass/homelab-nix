@@ -3,7 +3,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     ./hardware-configuration.nix
     ../../modules/core
@@ -24,7 +25,7 @@
 
       vramDynamicSplit = null; # example: 4096
 
-      sensors.enable = true; 
+      sensors.enable = true;
       gpuGovernor.enable = true;
       zswap.enable = true;
     };
@@ -60,7 +61,7 @@
   services.tailscale = {
     enable = true;
     authKeyFile = config.sops.secrets."headscale-preauthkey".path;
-    extraUpFlags = ["--login-server=https://headscale.endercass.me"];
+    extraUpFlags = [ "--login-server=https://headscale.endercass.me" ];
     openFirewall = true;
   };
 
@@ -70,8 +71,8 @@
     apiAddress = "100.81.0.1";
     nodeIp = "100.81.0.1";
     tokenFile = config.sops.secrets."k0s-token".path;
-    nodeLabels = ["hardware.gpu/type=bc250"];
-    nodeTaints = ["dedicated=gpu:NoSchedule"];
+    nodeLabels = [ "hardware.gpu/type=bc250" ];
+    nodeTaints = [ "dedicated=gpu:NoSchedule" ];
   };
 
   boot.initrd.luks.devices.cryptroot.device = "/dev/disk/by-label/NIXOS-LUKS";
@@ -84,11 +85,14 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-label/NIXOS-BOOT";
     fsType = "vfat";
-    options = ["fmask=0022" "dmask=0022"];
+    options = [
+      "fmask=0022"
+      "dmask=0022"
+    ];
   };
 
   swapDevices = [
-    {device = "/dev/NIXOS_LVM/SWAP";}
+    { device = "/dev/NIXOS_LVM/SWAP"; }
   ];
 
   system.stateVersion = "26.05";

@@ -1,9 +1,11 @@
-{config, ...}: let
+{ config, ... }:
+let
   hostConfig = config;
-in {
+in
+{
   containers.forgejo = {
     autoStart = true;
-    macvlans = ["enp2s0"];
+    macvlans = [ "enp2s0" ];
     enableTun = true;
 
     bindMounts."/run/secrets/headscale-preauthkey" = {
@@ -28,7 +30,7 @@ in {
       services.tailscale = {
         enable = true;
         authKeyFile = "/run/secrets/headscale-preauthkey";
-        extraUpFlags = ["--login-server=https://headscale.endercass.me"];
+        extraUpFlags = [ "--login-server=https://headscale.endercass.me" ];
         openFirewall = true;
       };
 
@@ -54,8 +56,11 @@ in {
         };
       };
 
-      environment.systemPackages = [config.services.forgejo.package];
-      networking.firewall.allowedTCPPorts = [3000 2222];
+      environment.systemPackages = [ config.services.forgejo.package ];
+      networking.firewall.allowedTCPPorts = [
+        3000
+        2222
+      ];
       system.stateVersion = "26.05";
     };
   };

@@ -1,8 +1,9 @@
 {
   config,
   ...
-}: {
-  networking.firewall.allowedTCPPorts = [5055];
+}:
+{
+  networking.firewall.allowedTCPPorts = [ 5055 ];
 
   virtualisation.oci-containers.containers.seerr = {
     image = "seerr/seerr:latest";

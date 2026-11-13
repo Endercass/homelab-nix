@@ -1,5 +1,5 @@
-{config, ...}: {
-  users.groups.discord-role-bot-secrets = {};
+{ config, ... }: {
+  users.groups.discord-role-bot-secrets = { };
 
   sops.secrets."discord-role-bot-config" = {
     sopsFile = ../../secrets/ash/discord-role-bot-config.json;
@@ -9,7 +9,9 @@
     mode = "0440";
   };
 
-  systemd.services.discord-role-bot.serviceConfig.SupplementaryGroups = ["discord-role-bot-secrets"];
+  systemd.services.discord-role-bot.serviceConfig.SupplementaryGroups = [
+    "discord-role-bot-secrets"
+  ];
 
   services.discord-role-bot = {
     enable = true;

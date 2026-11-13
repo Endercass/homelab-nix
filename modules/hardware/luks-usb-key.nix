@@ -6,7 +6,8 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.homelab.luksUsbKey;
 
   findUsbKeyScript = pkgs.writeShellScript "find-usb-key" ''
@@ -50,7 +51,8 @@ with lib; let
     umount "$MNT"
     rmdir "$MNT"
   '';
-in {
+in
+{
   options.homelab.luksUsbKey = {
     enable = mkEnableOption "unlocking a LUKS device from a labeled USB key in the initrd";
 
@@ -79,8 +81,11 @@ in {
 
   config = mkIf cfg.enable {
     # boot.initrd.systemd.enable = true;
-    boot.initrd.systemd.initrdBin = with pkgs; [util-linux coreutils];
-    boot.initrd.systemd.storePaths = [findUsbKeyScript];
+    boot.initrd.systemd.initrdBin = with pkgs; [
+      util-linux
+      coreutils
+    ];
+    boot.initrd.systemd.storePaths = [ findUsbKeyScript ];
 
     boot.initrd.systemd.services."find-usb-key@" = {
       description = "Copy LUKS key from %I if labeled ${cfg.usbLabel}";

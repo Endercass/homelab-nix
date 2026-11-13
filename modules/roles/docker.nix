@@ -2,7 +2,8 @@
   config,
   lib,
   ...
-}: {
+}:
+{
   virtualisation.docker.enable = true;
   virtualisation.oci-containers.backend = "docker";
 

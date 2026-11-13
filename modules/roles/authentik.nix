@@ -1,9 +1,11 @@
-{config, inputs, ...}: let
+{ config, inputs, ... }:
+let
   hostConfig = config;
-in {
+in
+{
   containers.authentik = {
     autoStart = true;
-    macvlans = ["enp2s0"];
+    macvlans = [ "enp2s0" ];
     enableTun = true;
 
     bindMounts."/run/secrets/authentik-env" = {
@@ -38,7 +40,7 @@ in {
       services.tailscale = {
         enable = true;
         authKeyFile = "/run/secrets/headscale-preauthkey";
-        extraUpFlags = ["--login-server=https://headscale.endercass.me"];
+        extraUpFlags = [ "--login-server=https://headscale.endercass.me" ];
         openFirewall = true;
       };
 
@@ -65,9 +67,13 @@ in {
         enable = true;
         environmentFile = "/run/secrets/authentik-ldap-env";
       };
-      systemd.services.authentik-ldap.serviceConfig.AmbientCapabilities = ["CAP_NET_BIND_SERVICE"];
+      systemd.services.authentik-ldap.serviceConfig.AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
 
-      networking.firewall.allowedTCPPorts = [9000 389 636];
+      networking.firewall.allowedTCPPorts = [
+        9000
+        389
+        636
+      ];
       system.stateVersion = "26.05";
     };
   };

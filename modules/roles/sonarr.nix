@@ -1,8 +1,9 @@
 {
   config,
   ...
-}: {
-  networking.firewall.allowedTCPPorts = [8989];
+}:
+{
+  networking.firewall.allowedTCPPorts = [ 8989 ];
 
   virtualisation.oci-containers.containers.sonarr = {
     image = "ghcr.io/hotio/sonarr:latest";

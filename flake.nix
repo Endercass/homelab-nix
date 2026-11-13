@@ -28,104 +28,131 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    bc-250,
-    authentik-nix,
-    microvm,
-    sops-nix,
-    discord-role-bot,
-    nixos-jellyfin,
-    k0s-nix,
-    ...
-  } @ inputs: let
-    # Target system for NixOS hosts (machines are x86_64)
-    system = "x86_64-linux";
-    pkgs = nixpkgs.legacyPackages.${system};
+  outputs =
+    {
+      self,
+      nixpkgs,
+      bc-250,
+      authentik-nix,
+      microvm,
+      sops-nix,
+      discord-role-bot,
+      nixos-jellyfin,
+      k0s-nix,
+      ...
+    }@inputs:
+    let
+      # Target system for NixOS hosts (machines are x86_64)
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
 
-    # Helper to generate attributes for multiple local systems (host running the deploy)
-    forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ];
+      # Helper to generate attributes for multiple local systems (host running the deploy)
+      forAllSystems = nixpkgs.lib.genAttrs [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
-    mkHost = hostname: extraModules:
-      nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {inherit inputs;};
-        modules =
-          [
+      mkHost =
+        hostname: extraModules:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = { inherit inputs; };
+          modules = [
             sops-nix.nixosModules.sops
             ./modules/roles/k0s.nix
             ./hosts/${hostname}
           ]
           ++ extraModules;
-      };
+        };
 
-    # Create a deploy app for a given pkgs set (local system), hostname and target
-    mkDeployApp = pkgsForLocal: hostname: targetHost: {
-      type = "app";
-      program = toString (pkgsForLocal.writeShellScript "deploy-${hostname}" ''
-        set -eu
-        exec ${pkgsForLocal.nixos-rebuild}/bin/nixos-rebuild switch \
-          --flake ${self}#${hostname} \
-          --target-host ${targetHost} \
-          --build-host ${targetHost} \
-          "$@"
-      '');
-    };
-
-    mkSopsApp = pkgsForLocal: action: hostname: {
-      type = "app";
-      program = toString (pkgsForLocal.lib.getExe (pkgsForLocal.writeShellApplication {
-          name = "sops-${action}-${hostname}";
-          runtimeInputs = with pkgsForLocal; [ coreutils git sops ];
-          text = ''
+      # Create a deploy app for a given pkgs set (local system), hostname and target
+      mkDeployApp = pkgsForLocal: hostname: targetHost: {
+        type = "app";
+        program = toString (
+          pkgsForLocal.writeShellScript "deploy-${hostname}" ''
             set -eu
-
-            repo="$(git rev-parse --show-toplevel)"
-            secrets_dir="$repo/secrets/${hostname}"
-
-            find "$secrets_dir" -type f -print0 |
-              while IFS= read -r -d "" secret; do
-                sops --${action} --in-place "$secret"
-              done
-          '';
-        }));
-    };
-  in {
-    nixosConfigurations = {
-      eiji = mkHost "eiji" [ ];
-      ash = mkHost "ash" [ discord-role-bot.nixosModules.default ];
-      charlotte = mkHost "charlotte" [ bc-250.nixosModules.bc250 ];
-      gyaruko = mkHost "gyaruko" [ bc-250.nixosModules.bc250 ];
-      relay = mkHost "relay" [ ];
-    };
-
-    apps = forAllSystems (localSystem: let
-      pkgsForLocal = nixpkgs.legacyPackages.${localSystem};
-    in {
-      deploy-eiji = mkDeployApp pkgsForLocal "eiji" "eiji.home.endercass.me";
-      deploy-ash = mkDeployApp pkgsForLocal "ash" "ash.home.endercass.me";
-      deploy-charlotte = mkDeployApp pkgsForLocal "charlotte" "charlotte.home.endercass.me";
-      deploy-gyaruko = mkDeployApp pkgsForLocal "gyaruko" "gyaruko.home.endercass.me";
-      deploy-relay = mkDeployApp pkgsForLocal "relay" "relay.endercass.me";
-      decrypt-eiji = mkSopsApp pkgsForLocal "decrypt" "eiji";
-      encrypt-eiji = mkSopsApp pkgsForLocal "encrypt" "eiji";
-      decrypt-ash = mkSopsApp pkgsForLocal "decrypt" "ash";
-      encrypt-ash = mkSopsApp pkgsForLocal "encrypt" "ash";
-      decrypt-charlotte = mkSopsApp pkgsForLocal "decrypt" "charlotte";
-      encrypt-charlotte = mkSopsApp pkgsForLocal "encrypt" "charlotte";
-      decrypt-gyaruko = mkSopsApp pkgsForLocal "decrypt" "gyaruko";
-      encrypt-gyaruko = mkSopsApp pkgsForLocal "encrypt" "gyaruko";
-      decrypt-relay = mkSopsApp pkgsForLocal "decrypt" "relay";
-      encrypt-relay = mkSopsApp pkgsForLocal "encrypt" "relay";
-    });
-
-    devShells = forAllSystems (localSystem: let
-      pkgsForLocal = nixpkgs.legacyPackages.${localSystem};
-    in {
-      default = pkgsForLocal.mkShell {
-        packages = with pkgsForLocal; [ nixos-rebuild openssh ];
+            exec ${pkgsForLocal.nixos-rebuild}/bin/nixos-rebuild switch \
+              --flake ${self}#${hostname} \
+              --target-host ${targetHost} \
+              --build-host ${targetHost} \
+              "$@"
+          ''
+        );
       };
-    });
-  };
+
+      mkSopsApp = pkgsForLocal: action: hostname: {
+        type = "app";
+        program = toString (
+          pkgsForLocal.lib.getExe (
+            pkgsForLocal.writeShellApplication {
+              name = "sops-${action}-${hostname}";
+              runtimeInputs = with pkgsForLocal; [
+                coreutils
+                git
+                sops
+              ];
+              text = ''
+                set -eu
+
+                repo="$(git rev-parse --show-toplevel)"
+                secrets_dir="$repo/secrets/${hostname}"
+
+                find "$secrets_dir" -type f -print0 |
+                  while IFS= read -r -d "" secret; do
+                    sops --${action} --in-place "$secret"
+                  done
+              '';
+            }
+          )
+        );
+      };
+    in
+    {
+      nixosConfigurations = {
+        eiji = mkHost "eiji" [ ];
+        ash = mkHost "ash" [ discord-role-bot.nixosModules.default ];
+        charlotte = mkHost "charlotte" [ bc-250.nixosModules.bc250 ];
+        gyaruko = mkHost "gyaruko" [ bc-250.nixosModules.bc250 ];
+        relay = mkHost "relay" [ ];
+      };
+
+      apps = forAllSystems (
+        localSystem:
+        let
+          pkgsForLocal = nixpkgs.legacyPackages.${localSystem};
+        in
+        {
+          deploy-eiji = mkDeployApp pkgsForLocal "eiji" "eiji.home.endercass.me";
+          deploy-ash = mkDeployApp pkgsForLocal "ash" "ash.home.endercass.me";
+          deploy-charlotte = mkDeployApp pkgsForLocal "charlotte" "charlotte.home.endercass.me";
+          deploy-gyaruko = mkDeployApp pkgsForLocal "gyaruko" "gyaruko.home.endercass.me";
+          deploy-relay = mkDeployApp pkgsForLocal "relay" "relay.endercass.me";
+          decrypt-eiji = mkSopsApp pkgsForLocal "decrypt" "eiji";
+          encrypt-eiji = mkSopsApp pkgsForLocal "encrypt" "eiji";
+          decrypt-ash = mkSopsApp pkgsForLocal "decrypt" "ash";
+          encrypt-ash = mkSopsApp pkgsForLocal "encrypt" "ash";
+          decrypt-charlotte = mkSopsApp pkgsForLocal "decrypt" "charlotte";
+          encrypt-charlotte = mkSopsApp pkgsForLocal "encrypt" "charlotte";
+          decrypt-gyaruko = mkSopsApp pkgsForLocal "decrypt" "gyaruko";
+          encrypt-gyaruko = mkSopsApp pkgsForLocal "encrypt" "gyaruko";
+          decrypt-relay = mkSopsApp pkgsForLocal "decrypt" "relay";
+          encrypt-relay = mkSopsApp pkgsForLocal "encrypt" "relay";
+        }
+      );
+
+      devShells = forAllSystems (
+        localSystem:
+        let
+          pkgsForLocal = nixpkgs.legacyPackages.${localSystem};
+        in
+        {
+          default = pkgsForLocal.mkShell {
+            packages = with pkgsForLocal; [
+              nixos-rebuild
+              openssh
+            ];
+          };
+        }
+      );
+    };
 }

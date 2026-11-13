@@ -3,7 +3,8 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     ./hardware-configuration.nix
     ../../modules/core
@@ -49,9 +50,9 @@
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
-      intel-vaapi-driver   
-      libvpl              
-      libva-utils         
+      intel-vaapi-driver
+      libvpl
+      libva-utils
     ];
     extraPackages32 = with pkgs.pkgsi686Linux; [
       intel-vaapi-driver
@@ -101,7 +102,7 @@
   services.tailscale = {
     enable = true;
     authKeyFile = config.sops.secrets."headscale-preauthkey".path;
-    extraUpFlags = ["--login-server=https://headscale.endercass.me"];
+    extraUpFlags = [ "--login-server=https://headscale.endercass.me" ];
     openFirewall = true;
   };
 
@@ -119,11 +120,14 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-label/NIXOS-BOOT";
     fsType = "vfat";
-    options = ["fmask=0022" "dmask=0022"];
+    options = [
+      "fmask=0022"
+      "dmask=0022"
+    ];
   };
 
   swapDevices = [
-    {device = "/dev/NIXOS_LVM/SWAP";}
+    { device = "/dev/NIXOS_LVM/SWAP"; }
   ];
 
   system.stateVersion = "26.05";

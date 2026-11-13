@@ -4,10 +4,11 @@
   pkgs,
   ...
 }:
-with lib; {
+with lib;
+{
   options.homelab.pubkeys = mkOption {
     type = types.attrsOf types.str;
-    default = {};
+    default = { };
     description = "Named SSH public keys usable across hosts.";
     example = {
       master = "ssh-ed25519 AAAA...";

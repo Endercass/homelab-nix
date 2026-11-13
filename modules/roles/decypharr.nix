@@ -1,8 +1,9 @@
 {
   config,
   ...
-}: {
-  networking.firewall.allowedTCPPorts = [8282];
+}:
+{
+  networking.firewall.allowedTCPPorts = [ 8282 ];
   systemd.tmpfiles.rules = [
     "d+ /media/arr/decypharr 0777 root root -"
   ];
@@ -10,7 +11,7 @@
   virtualisation.oci-containers.containers.tailscale-decypharr = {
     image = "tailscale/tailscale:stable";
     autoStart = true;
-    ports = ["8282:8282"];
+    ports = [ "8282:8282" ];
     volumes = [
       "/var/lib/tailscale-decypharr:/var/lib/tailscale"
       "${config.sops.secrets."headscale-preauthkey".path}:/run/secrets/headscale-preauthkey:ro"
@@ -44,7 +45,7 @@
   virtualisation.oci-containers.containers.decypharr = {
     image = "cy01/blackhole:latest";
     autoStart = true;
-    dependsOn = ["tailscale-decypharr"];
+    dependsOn = [ "tailscale-decypharr" ];
     volumes = [
       "/var/lib/decypharr:/app"
       "/media:/mnt:rshared"

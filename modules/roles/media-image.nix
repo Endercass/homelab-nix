@@ -1,17 +1,30 @@
-args: { lib, pkgs, config, ... }:
+args:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   imagePath = args.imagePath or "/var/lib/media-disk.img";
   imageSize = args.imageSize or "64G";
   mountPoint = args.mountPoint or "/media";
   label = args.label or "MEDIA";
-  subdirs = args.subdirs or [
-    "jellyfin/movies"
-    "jellyfin/tv"
-    "jellyfin/music"
-    "downloads"
-    "transcode"
-  ];
-  mountOptions = (args.mountOptions or [ "compress=zstd" "noatime" ]) ++ [ "loop" ];
+  subdirs =
+    args.subdirs or [
+      "jellyfin/movies"
+      "jellyfin/tv"
+      "jellyfin/music"
+      "downloads"
+      "transcode"
+    ];
+  mountOptions =
+    (args.mountOptions or [
+      "compress=zstd"
+      "noatime"
+    ]
+    )
+    ++ [ "loop" ];
 
   mountUnit = lib.escapeSystemdPath mountPoint + ".mount";
   subdirPaths = map (d: mountPoint + "/" + d) subdirs;
@@ -23,9 +36,11 @@ let
       echo "$mp is not mounted; exiting"
       exit 1
     fi
-    ${lib.concatStringsSep "\n" (map (p: ''
-      mkdir -p ${lib.escapeShellArg p}
-    '') subdirPaths)}
+    ${lib.concatStringsSep "\n" (
+      map (p: ''
+        mkdir -p ${lib.escapeShellArg p}
+      '') subdirPaths
+    )}
   '';
 
   setupScript = pkgs.writeShellScript "media-image-setup" ''
@@ -51,7 +66,8 @@ let
     chown root:root "$img"
     chmod 0640 "$img"
   '';
-in {
+in
+{
   # Create the image (if missing) during activation, before systemd restarts
   system.activationScripts.mediaImageSetup = {
     deps = [ ];
@@ -76,6 +92,9 @@ in {
       ExecStart = postMountScript;
       RequiresMountsFor = [ mountPoint ];
     };
-    path = [ pkgs.coreutils pkgs.util-linux ];
+    path = [
+      pkgs.coreutils
+      pkgs.util-linux
+    ];
   };
 }

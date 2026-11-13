@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.homelab.networkd;
-in {
+in
+{
   options.homelab.networkd = {
     enable = mkEnableOption "ethernet networking via systemd-networkd";
 
@@ -62,13 +64,12 @@ in {
       address = optional (!cfg.dhcp) "${cfg.address}/${toString cfg.prefixLength}";
       gateway = optional (!cfg.dhcp) cfg.gateway;
       networkConfig.DHCP = if cfg.dhcp then "yes" else "no";
-      linkConfig =
-        {
-          RequiredForOnline = "routable";
-        }
-        // optionalAttrs (cfg.macAddress != null) {
-          MACAddress = cfg.macAddress;
-        };
+      linkConfig = {
+        RequiredForOnline = "routable";
+      }
+      // optionalAttrs (cfg.macAddress != null) {
+        MACAddress = cfg.macAddress;
+      };
     };
   };
 }

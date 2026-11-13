@@ -8,11 +8,16 @@ let
   cfg = config.homelab.k0s;
   workerArgs =
     (lib.optional (cfg.workerProfile != null) "--profile=${lib.escapeShellArg cfg.workerProfile}")
-    ++ (lib.optional (cfg.nodeLabels != [ ]) "--labels=${lib.escapeShellArg (lib.concatStringsSep "," cfg.nodeLabels)}")
-    ++ (lib.optional (cfg.nodeTaints != [ ]) "--taints=${lib.escapeShellArg (lib.concatStringsSep "," cfg.nodeTaints)}")
+    ++ (lib.optional (
+      cfg.nodeLabels != [ ]
+    ) "--labels=${lib.escapeShellArg (lib.concatStringsSep "," cfg.nodeLabels)}")
+    ++ (lib.optional (
+      cfg.nodeTaints != [ ]
+    ) "--taints=${lib.escapeShellArg (lib.concatStringsSep "," cfg.nodeTaints)}")
     ++ cfg.extraArgs;
   kubeletArgs = lib.optional (cfg.nodeIp != null) "--kubelet-extra-args=--node-ip=${cfg.nodeIp}";
-in {
+in
+{
   imports = [ inputs.k0s-nix.nixosModules.default ];
 
   options.homelab.k0s = {
@@ -119,13 +124,20 @@ in {
       ];
 
       systemd.services.k0s = {
-        after = ["tailscaled-autoconnect.service"];
-        wants = ["tailscaled-autoconnect.service"];
+        after = [ "tailscaled-autoconnect.service" ];
+        wants = [ "tailscaled-autoconnect.service" ];
       };
 
       networking.firewall.allowedTCPPorts =
-        lib.optionals (cfg.role != "worker") [ 6443 8133 9443 ]
-        ++ lib.optionals (cfg.role == "worker") [ 10250 8132 ];
+        lib.optionals (cfg.role != "worker") [
+          6443
+          8133
+          9443
+        ]
+        ++ lib.optionals (cfg.role == "worker") [
+          10250
+          8132
+        ];
 
       services.k0s = {
         enable = true;
@@ -133,10 +145,9 @@ in {
         clusterName = cfg.clusterName;
         tokenFile = cfg.tokenFile;
         controller.isLeader = cfg.isLeader;
-        extraArgs =
-          lib.concatStringsSep " "
-            (kubeletArgs
-              ++ (if cfg.role == "worker" then workerArgs else cfg.extraArgs));
+        extraArgs = lib.concatStringsSep " " (
+          kubeletArgs ++ (if cfg.role == "worker" then workerArgs else cfg.extraArgs)
+        );
         spec = lib.recursiveUpdate cfg.spec {
           api = {
             address = cfg.apiAddress;

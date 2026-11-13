@@ -3,7 +3,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     ./hardware-configuration.nix
     ../../modules/core
@@ -43,7 +44,7 @@
   services.tailscale = {
     enable = true;
     authKeyFile = config.sops.secrets."headscale-preauthkey".path;
-    extraUpFlags = ["--login-server=https://headscale.endercass.me"];
+    extraUpFlags = [ "--login-server=https://headscale.endercass.me" ];
     openFirewall = true;
   };
 
@@ -53,7 +54,7 @@
     apiAddress = "100.81.0.4";
     nodeIp = "100.81.0.4";
     tokenFile = config.sops.secrets."k0s-token".path;
-    nodeLabels = ["node-pool=infrastructure"];
+    nodeLabels = [ "node-pool=infrastructure" ];
   };
 
   boot.initrd.luks.devices.cryptroot.device = "/dev/disk/by-label/NIXOS-LUKS";
@@ -66,11 +67,14 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-label/NIXOS-BOOT";
     fsType = "vfat";
-    options = ["fmask=0022" "dmask=0022"];
+    options = [
+      "fmask=0022"
+      "dmask=0022"
+    ];
   };
 
   swapDevices = [
-    {device = "/dev/NIXOS_LVM/SWAP";}
+    { device = "/dev/NIXOS_LVM/SWAP"; }
   ];
 
   system.stateVersion = "26.05";

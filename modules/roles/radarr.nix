@@ -1,8 +1,9 @@
 {
   config,
   ...
-}: {
-  networking.firewall.allowedTCPPorts = [7878];
+}:
+{
+  networking.firewall.allowedTCPPorts = [ 7878 ];
 
   virtualisation.oci-containers.containers.radarr = {
     image = "ghcr.io/hotio/radarr:latest";

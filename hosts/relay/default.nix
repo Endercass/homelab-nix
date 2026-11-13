@@ -3,11 +3,12 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     ./hardware-configuration.nix
     ../../modules/core
-     ../../modules/hardware/network.nix
+    ../../modules/hardware/network.nix
     ../../modules/roles/ssh.nix
   ];
 
@@ -28,7 +29,7 @@
   services.caddy = {
     enable = true;
     package = pkgs.caddy.withPlugins {
-      plugins = ["github.com/mholt/caddy-l4@master"];
+      plugins = [ "github.com/mholt/caddy-l4@master" ];
       hash = "sha256-6E+9btb7joeE1k2UNnC1Avo3soyCT2PmiOHNbN2lvYk=";
       doInstallCheck = false;
     };
@@ -62,7 +63,6 @@
       "relay.endercass.me".extraConfig = ''
         respond "To be done: set up relay server."
       '';
-
 
       "https://auth.endercass.me".extraConfig = ''
         reverse_proxy http://authentik:9000 http://localhost:9999 {
@@ -125,12 +125,33 @@
       '';
     };
 
-
   };
 
-  networking.firewall.allowedTCPPorts = [80 443 8443 9999 8005 5222 5269 25565 25567 6767 2022 2023 2222 22];
-  networking.firewall.allowedUDPPorts = [3478 24454 5520 19132 16261 16262];
-  networking.firewall.trustedInterfaces = ["tailscale0"];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+    8443
+    9999
+    8005
+    5222
+    5269
+    25565
+    25567
+    6767
+    2022
+    2023
+    2222
+    22
+  ];
+  networking.firewall.allowedUDPPorts = [
+    3478
+    24454
+    5520
+    19132
+    16261
+    16262
+  ];
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
 
   sops.secrets."headscale-oidc-client-secret" = {
     sopsFile = ../../secrets/relay/headscale-oidc-client-secret;
@@ -190,16 +211,19 @@
   services.tailscale = {
     enable = true;
     authKeyFile = config.sops.secrets."headscale-preauthkey".path;
-    extraUpFlags = ["--login-server=https://headscale.endercass.me" "--advertise-exit-node"];
+    extraUpFlags = [
+      "--login-server=https://headscale.endercass.me"
+      "--advertise-exit-node"
+    ];
     useRoutingFeatures = "server";
     openFirewall = true;
   };
 
   systemd.services.tailscale-advertise-exit-node = {
     description = "Advertise relay as a Tailscale exit node";
-    wantedBy = ["multi-user.target"];
-    wants = ["tailscaled-autoconnect.service"];
-    after = ["tailscaled-autoconnect.service"];
+    wantedBy = [ "multi-user.target" ];
+    wants = [ "tailscaled-autoconnect.service" ];
+    after = [ "tailscaled-autoconnect.service" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
