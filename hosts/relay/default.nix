@@ -37,6 +37,14 @@
       servers {
         trusted_proxies static private_ranges
       }
+
+      layer4 {
+        :2222 {
+          route {
+            proxy forgejo:2222
+          }
+        }
+      }
     '';
 
     extraConfig = ''
@@ -44,6 +52,7 @@
         header_up Host {host}
         header_up X-Real-IP {remote_host}
       }
+
     '';
 
     virtualHosts = {
@@ -102,12 +111,24 @@
           }
         }
       '';
+
+      "https://git.endercass.me".extraConfig = ''
+        reverse_proxy http://forgejo:3000 http://localhost:9999 {
+          import proxy_headers
+          lb_policy first
+          lb_try_duration 1s
+          fail_duration 30s
+          transport http {
+            dial_timeout 500ms
+          }
+        }
+      '';
     };
 
 
   };
 
-  networking.firewall.allowedTCPPorts = [80 443 8443 9999 8005 5222 5269 25565 25567 6767 2022 2023 22];
+  networking.firewall.allowedTCPPorts = [80 443 8443 9999 8005 5222 5269 25565 25567 6767 2022 2023 2222 22];
   networking.firewall.allowedUDPPorts = [3478 24454 5520 19132 16261 16262];
   networking.firewall.trustedInterfaces = ["tailscale0"];
 

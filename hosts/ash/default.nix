@@ -17,6 +17,8 @@
     ../../modules/roles/prowlarr.nix
     ../../modules/roles/seerr.nix
     ../../modules/roles/decypharr.nix
+    ../../modules/roles/authentik.nix
+    ../../modules/roles/forgejo.nix
     inputs.nixos-jellyfin.nixosModules.default
     ../../modules/roles/discord-role-bot.nix
     (import ../../modules/roles/media-image.nix {
@@ -106,49 +108,6 @@
   environment.etc."fuse.conf".text = ''
     user_allow_other
   '';
-
-  containers.authentik = {
-    autoStart = true;
-    macvlans = ["enp2s0"];
-    enableTun = true; # grants CAP_NET_ADMIN + /dev/net/tun for tailscale
-
-    bindMounts."/run/secrets/authentik-env" = {
-      hostPath = config.sops.secrets."authentik-env".path;
-      isReadOnly = true;
-    };
-
-    bindMounts."/run/secrets/authentik-ldap-env" = {
-      hostPath = config.sops.secrets."authentik-ldap-env".path;
-      isReadOnly = true;
-    };
-
-    bindMounts."/run/secrets/headscale-preauthkey" = {
-      hostPath = config.sops.secrets."headscale-preauthkey".path;
-      isReadOnly = true;
-    };
-
-    config = {
-      imports = [
-        inputs.authentik-nix.nixosModules.default
-        ../../modules/hardware/network.nix
-        ../../modules/roles/authentik.nix
-      ];
-
-      homelab.networkd = {
-        enable = true;
-        dhcp = true;
-        interface = "mv-enp2s0";
-      };
-      networking.useHostResolvConf = false;
-
-      services.tailscale = {
-        enable = true;
-        authKeyFile = "/run/secrets/headscale-preauthkey";
-        extraUpFlags = ["--login-server=https://headscale.endercass.me"];
-        openFirewall = true;
-      };
-    };
-  };
 
   boot.initrd.luks.devices.cryptroot.device = "/dev/disk/by-label/NIXOS-LUKS";
 

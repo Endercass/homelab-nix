@@ -40,6 +40,12 @@ in {
       default = "en*";
       description = "interface match pattern. defaults to en*";
     };
+
+    macAddress = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Fixed MAC address for the matched interface";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -56,7 +62,13 @@ in {
       address = optional (!cfg.dhcp) "${cfg.address}/${toString cfg.prefixLength}";
       gateway = optional (!cfg.dhcp) cfg.gateway;
       networkConfig.DHCP = if cfg.dhcp then "yes" else "no";
-      linkConfig.RequiredForOnline = "routable";
+      linkConfig =
+        {
+          RequiredForOnline = "routable";
+        }
+        // optionalAttrs (cfg.macAddress != null) {
+          MACAddress = cfg.macAddress;
+        };
     };
   };
 }
