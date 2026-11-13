@@ -6,6 +6,9 @@
 }:
 let
   cfg = config.homelab.k0s;
+  kubeletExtraArgs =
+    (lib.optional (cfg.nodeIp != null) "--node-ip=${cfg.nodeIp}")
+    ++ [ "--resolv-conf=/run/systemd/resolve/resolv.conf" ];
   workerArgs =
     (lib.optional (cfg.workerProfile != null) "--profile=${lib.escapeShellArg cfg.workerProfile}")
     ++ (lib.optional (
@@ -15,7 +18,9 @@ let
       cfg.nodeTaints != [ ]
     ) "--taints=${lib.escapeShellArg (lib.concatStringsSep "," cfg.nodeTaints)}")
     ++ cfg.extraArgs;
-  kubeletArgs = lib.optional (cfg.nodeIp != null) "--kubelet-extra-args=--node-ip=${cfg.nodeIp}";
+  kubeletArgs = [
+    "--kubelet-extra-args=${lib.escapeShellArg (lib.concatStringsSep " " kubeletExtraArgs)}"
+  ];
 in
 {
   imports = [ inputs.k0s-nix.nixosModules.default ];
@@ -146,7 +151,8 @@ in
         tokenFile = cfg.tokenFile;
         controller.isLeader = cfg.isLeader;
         extraArgs = lib.concatStringsSep " " (
-          kubeletArgs ++ (if cfg.role == "worker" then workerArgs else cfg.extraArgs)
+          kubeletArgs
+          ++ (if cfg.role == "worker" || cfg.role == "controller+worker" then workerArgs else cfg.extraArgs)
         );
         spec = lib.recursiveUpdate cfg.spec {
           api = {

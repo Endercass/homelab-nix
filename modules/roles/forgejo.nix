@@ -45,6 +45,7 @@ in
             ROOT_URL = "https://git.endercass.me/";
             SSH_DOMAIN = "git.endercass.me";
             SSH_PORT = 2222;
+            START_SSH_SERVER = true;
           };
           packages = {
             ENABLED = true;
